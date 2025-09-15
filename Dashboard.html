@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sanchez&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <style>
+    body { font-family: 'Roboto', sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+    h1, h2, h3 { font-family: 'Sanchez', serif; }
+    .main-container { max-width: 1200px; margin: auto; }
+    .header { display: flex; align-items: center; background-color: #000000; color: #ffffff; padding: 15px 25px; border-bottom: 4px solid #d9534f; border-radius: 8px 8px 0 0; }
+    .header img { height: 40px; margin-right: 20px; border-radius: 50%; }
+    .header h1 { margin: 0; font-size: 24px; }
+    .content { background-color: #ffffff; padding: 25px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .grid-container { display: grid; grid-template-columns: 1fr 1fr; grid-gap: 25px; margin-top: 25px; }
+    .chart-card { padding: 20px; border-radius: 8px; background-color: #f9f9f9; border: 1px solid #eee; }
+    .chart-card h3 { margin: 0 0 15px 0; text-align: center; }
+    .chart-container { width: 100%; }
+    #timeline_chart, #settlement_chart { height: 350px; }
+    #quality_gauge { height: 200px; }
+    #leaderboard_table { height: 260px; }
+    #status-message { text-align: center; font-size: 18px; color: #555; padding: 50px; }
+    .error { color: #d9534f; font-family: monospace; background-color: #fdf7f7; border: 1px solid #d9534f; padding: 15px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <div class="header">
+      <img src="https://media.licdn.com/dms/image/v2/C560BAQGeJKFbZkgE4A/company-logo_200_200/company-logo_200_200/0/1630613751896/spatial_collective_logo?e=2147483647&v=beta&t=RY7cmW1FlZkRHsKpN1DT1kJZcyipuzbmbKpElErEJ78" alt="Logo">
+      <h1>DPW Performance Dashboard</h1>
+    </div>
+    <div class="content">
+      <div id="status-message">Loading Dashboard Data... 🚀</div>
+      <div id="dashboard-grid" class="grid-container" style="display: none;">
+        <div class="chart-card">
+          <h3>Buildings Digitized Over Time</h3>
+          <div id="timeline_chart" class="chart-container"></div>
+        </div>
+        <div class="chart-card">
+          <h3>Contribution by Settlement</h3>
+          <div id="settlement_chart" class="chart-container"></div>
+        </div>
+        <div class="chart-card">
+          <h3>Overall Average Quality</h3>
+          <div id="quality_gauge" class="chart-container"></div>
+        </div>
+        <div class="chart-card">
+          <h3>Performance Leaderboard</h3>
+          <div id="leaderboard_table" class="chart-container"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    google.charts.load('current', {'packages':['corechart', 'table', 'gauge']});
+    google.charts.setOnLoadCallback(drawDashboard);
+
+    function drawDashboard() {
+      google.script.run.withSuccessHandler(processData).getDashboardData();
+    }
+
+    function processData(responseObject) {
+      try {
+        const dataFromServer = responseObject.data;
+        
+        if (dataFromServer.length <= 1) {
+          document.getElementById('status-message').innerText = 'No data available to display.';
+          return;
+        }
+
+        const dataTable = google.visualization.arrayToDataTable(dataFromServer);
+        
+        // --- Draw All Charts ---
+        const timelineView = new google.visualization.DataView(dataTable);
+        timelineView.setColumns([0, 3]);
+        const timelineChart = new google.visualization.ColumnChart(document.getElementById('timeline_chart'));
+        timelineChart.draw(timelineView, { fontName: 'Sanchez', colors: ['#d9534f'], legend: { position: 'none' } });
+
+        const settlementData = google.visualization.data.group(dataTable, [1], [{'column': 3, 'aggregation': google.visualization.data.sum, 'type': 'number'}]);
+        const settlementChart = new google.visualization.PieChart(document.getElementById('settlement_chart'));
+        settlementChart.draw(settlementData, { fontName: 'Sanchez', pieHole: 0.4 });
+
+        const qualityData = google.visualization.data.group(dataTable, [], [{'column': 4, 'aggregation': google.visualization.data.avg, 'type': 'number'}]);
+        const avgQuality = qualityData.getValue(0, 0) * 100;
+        const gaugeData = google.visualization.arrayToDataTable([['Label', 'Value'], ['Quality', avgQuality]]);
+        const gaugeChart = new google.visualization.Gauge(document.getElementById('quality_gauge'));
+        gaugeChart.draw(gaugeData, { redFrom: 0, redTo: 60, yellowFrom: 60, yellowTo: 90, greenFrom: 90, greenTo: 100, minorTicks: 5 });
+        
+        const leaderboardData = google.visualization.data.group(dataTable, [2], [{'column': 3, 'aggregation': google.visualization.data.sum, 'type': 'number'}]);
+        leaderboardData.sort([{column: 1, desc: true}]);
+        const table = new google.visualization.Table(document.getElementById('leaderboard_table'));
+        table.draw(leaderboardData, {showRowNumber: true, width: '100%', height: '100%'});
+
+        // Display the dashboard
+        document.getElementById('status-message').style.display = 'none';
+        document.getElementById('dashboard-grid').style.display = 'grid';
+      } catch (e) {
+        // --- NEW: Detailed Error Handling ---
+        document.getElementById('status-message').innerHTML = '<div class="error"><strong>Dashboard Error:</strong><br>' + e.message + '</div>';
+        console.error(e); // Log the full error to the console for technical users
+      }
+    }
+  </script>
+</body>
+</html>
