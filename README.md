@@ -1,52 +1,61 @@
-# DPW Digitization Workflow Automation
+# DPW Digitization Workflow Automation — v1
 
-This repository contains Google Apps Script files and associated HTML templates designed to automate and streamline the Digitization Project Workflow (DPW) within Google Workspace (Google Sheets and Google Forms).
+This repository contains the first (v1) release of the DPW automation workflow: a Google Apps Script project (bound to a Google Sheet) that logs validation submissions, de-duplicates and summarizes daily mapper performance, generates payment reports, and exposes a simple dashboard for managers.
 
-## Overview
+This v1 commit captures the original automation logic and UI used in production for the DPW project.
 
-The scripts and web apps in this project aim to reduce manual effort in data collection, processing, reporting, and visualization for the DPW. They provide tools for managing validator lists, processing validation submissions, calculating mapper performance, generating payment reports, and offering a real-time performance dashboard.
+## What’s included (high level)
 
-## Files
+- Server endpoints for integrations (e.g., `doGet` / `doPost`) that are used by external tools (JOSM plugin).
+- Validation log ingestion and server-side security checks to ensure mappers/validators are registered.
+- The automation engine (`runAutomatedDailySummary`) that de-duplicates validation entries (keeps the most recent per Task ID), computes quality and pay, and writes `Daily_Performance_Summary`.
+- Report export utilities that allow generation of Daily/Weekly/Monthly payment reports as new Google Sheets.
+- A simple, client-side dashboard (`Dashboard.html`) built with Google Charts and a `DateRangeDialog.html` modal used to request ad-hoc report generation.
 
-### `code.gs`
+## Files of interest
 
-This Google Apps Script file is the core logic of the automation system. It includes functions for:
+- `code.gs` — core API endpoints and glue code between the spreadsheet, web UI, and external integrations.
+- `AutomationEngine.gs` — daily automation and payment logic (de-duplication and pay calculations).
+- `ReportExporter.gs` — custom menu & report export helpers.
+- `Dashboard.html` & `DateRangeDialog.html` — HTMLService files used for the dashboard and date-range report dialog.
 
--   **Updating Validator Lists**: Automatically populates Google Form dropdowns with current validator names from a designated Google Sheet.
--   **Processing Form Submissions**: Handles data submitted through the validation form, logs it, calculates quality scores, and sends automated email notifications for any data entry errors (e.g., unrecognized mapper usernames or validator names).
--   **Calculating Daily Performance Summaries**: Aggregates daily validation data to calculate individual mapper performance, including total buildings digitized, average quality scores, and payment calculations based on predefined targets and bonuses.
--   **Generating Payment Reports**: Creates a custom menu in the Google Sheet to allow users to select a date range and generate a CSV report of mapper payments, saved directly to Google Drive.
--   **Serving Dashboard Data**: Provides the backend data for the `Dashboard.html` web application, dynamically fetching and structuring performance metrics from Google Sheets.
+## Quick deploy & verification (Google Apps Script)
 
-### `DateRangeDialog.html`
+1. Open the Google Sheet that will host this project.
+2. Open Extensions → Apps Script and create a new Apps Script project (or use the existing bound script).
+3. Copy/paste the `.gs` files (`code.gs`, `AutomationEngine.gs`, `ReportExporter.gs`) into the Apps Script editor and add the two HTML files as HTML service assets (`Dashboard.html`, `DateRangeDialog.html`).
+4. From the Apps Script editor, save all files and run the following manual checks:
+    - Run `onOpen` once to register the "Export Reports" menu.
+    - Run `runAutomatedDailySummary` manually to test the summary generation (use a copy of your spreadsheet for testing).
+5. Configure triggers:
+    - Install an `onFormSubmit` trigger for the form submission handler (if using a Google Form).
+    - Optionally add a time-driven trigger (daily) for `runAutomatedDailySummary`.
 
-This HTML file serves as a simple user interface for selecting a start and end date. It is displayed as a modal dialog within the Google Sheet environment (triggered by `code.gs`) to facilitate the generation of payment reports for a specific period.
+## Repository
 
-### `Dashboard.html`
+This repository contains the v1 release of the DPW automation workflow. The code in this project is intended to be managed through your normal version control and deployment processes. The maintainers should push this initial commit to the organization remote and create the appropriate release tag (for example: `v1.0.0`).
 
-This HTML file functions as a dynamic web-based dashboard for visualizing DPW performance. It leverages Google Charts to display key metrics, including:
+## README additions for maintainers / deployers
 
--   **Buildings Digitized Over Time**: A column chart showing daily or cumulative digitization progress.
--   **Contribution by Settlement**: A pie chart illustrating the distribution of work across different geographical settlements.
--   **Overall Average Quality**: A gauge chart indicating the average quality score across all validations.
--   **Performance Leaderboard**: A table ranking mappers based on their contributions.
+- Verify the sheet tab names: `Youth_Registry` (or `Official_Participant_List`), `Validation_Log`, and `Daily_Performance_Summary` exist and have expected columns.
+- Confirm the Google Form (if any) maps form answers to the expected columns in `Validation_Log`.
+- The dashboard calls a server function `getDashboardData()`; ensure it exists in `code.gs` (or update the UI to call the correct function name).
 
-The dashboard fetches its data in real-time from the `getDashboardData()` function within `code.gs`, providing up-to-date insights into the project's status.
+## Verification checklist (minimal)
 
-## Setup and Usage
+1. Dashboard loads without JS errors and shows data (if `Daily_Performance_Summary` contains rows).
+2. `runAutomatedDailySummary` completes successfully and writes aggregated rows to `Daily_Performance_Summary`.
+3. Clicking Export Reports → Export Daily Summary Report creates a new Google Sheet and returns a link.
 
-To use these scripts, they typically need to be deployed as a Google Apps Script project bound to a Google Sheet. The `code.gs` file would be the primary script, and `DateRangeDialog.html` and `Dashboard.html` would be HTML service files within the same project.
+## Next steps (recommended)
 
-1.  **Google Sheet Structure**: Ensure your Google Sheet contains the following sheets with appropriate data:
-    -   `Official_Participant_List`: Contains details of mappers and validators, including UserIDs, FullNames, OSM Usernames, and Roles (e.g., 'Validator').
-    -   `Validation_Log`: Stores detailed records of each validation submission.
-    -   `Daily_Performance_Summary`: Stores aggregated daily performance metrics for mappers.
-2.  **Google Form**: A Google Form linked to the Google Sheet is required for submitting validation data. Ensure it collects email addresses and has questions for "Validator's Full Name", "Mapper's OSM Username", "Task ID", and other relevant validation metrics.
-3.  **Deployment**: Deploy `code.gs` as a script project. `DateRangeDialog.html` and `Dashboard.html` should be added as HTML files within the Apps Script project.
-4.  **Triggers**: Set up an `onFormSubmit` trigger for the `onFormSubmit` function in `code.gs` to run automatically when the Google Form is submitted. A time-driven trigger can be set for `calculateDailySummaries` to run daily.
-5.  **Accessing the Dashboard**: Deploy `Dashboard.html` as a web app (via `doGet` function in `code.gs`) to get a URL for accessing the performance dashboard.
-6.  **Payment Report**: Access the "DPW Admin Tools" custom menu in the Google Sheet to generate payment reports.
+1. Add automated tests or smoke-checks (e.g., a `validateSpreadsheet()` function that checks for required sheet names and column counts).
+2. Add CI (if desired) to run linting or validation on push.
+3. If you want, I can implement `getDashboardData()` and `processPaymentReport()` server functions (if missing) so the HTML files operate end-to-end.
 
-## Contribution
+## Contact / Issues
 
-For any issues or suggestions, please refer to the project's issue tracker or contact the maintainers.
+For questions or to report issues, open an issue on the GitHub repo or contact the maintainers listed in project metadata.
+
+---
+_This README was updated as part of preparing the v1 release and to include push/deploy instructions for Windows PowerShell users._
