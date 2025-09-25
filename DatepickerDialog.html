@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <style>
+      .main-container { padding: 10px; }
+      .hidden { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="main-dialog" class="main-container">
+      <p>Please select the date of the training session:</p>
+      <input type="date" id="training-date" style="width: 100%; margin-bottom: 10px;">
+      
+      <button class="action" id="submit-button" onclick="submitDate()">Log Attendance</button>
+      <button onclick="google.script.host.close()">Cancel</button>
+    </div>
+    
+    <div id="loading-dialog" class="main-container hidden">
+      <p>Processing... Please wait.</p>
+    </div>
+
+    <script>
+      // Set the max attribute on the date input to today's date to prevent future selections
+      document.addEventListener('DOMContentLoaded', function() {
+        var today = new Date().toISOString().split('T')[0];
+        document.getElementById('training-date').setAttribute('max', today);
+      });
+
+      function submitDate() {
+        var dateValue = document.getElementById('training-date').value;
+        if (!dateValue) {
+          alert('Please select a date.');
+          return;
+        }
+
+        // Show loading state and disable the button
+        document.getElementById('main-dialog').classList.add('hidden');
+        document.getElementById('loading-dialog').classList.remove('hidden');
+
+        google.script.run
+          .withSuccessHandler(google.script.host.close)
+          .withFailureHandler(function(error) {
+            alert(error.message); // Show the specific error from the script
+            google.script.host.close();
+           })
+          .processTrainingDate(dateValue);
+      }
+    </script>
+  </body>
+</html>
