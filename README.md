@@ -75,4 +75,4 @@ This project is governed by the internal Spatial Collective license (see `LICENS
 If you need help or want me to implement additional features (tests, CI, dashboard wiring), open an issue or ping the maintainers.
 
 ---
-_This README is written to be compact and actionable for internal developer use. If you'd like a more detailed developer guide or onboarding checklist, I can add that as separate markdown files._
+_This README is written to be compact and actionable for internal developer use._
