@@ -57,11 +57,7 @@ This repository contains the v1 release of the DPW automation workflow. The code
 2. `runAutomatedDailySummary` completes successfully and writes aggregated rows to `Daily_Performance_Summary`.
 3. Clicking Export Reports → Export Daily Summary Report creates a new Google Sheet and returns a link.
 
-## Next steps (recommended)
-
-1. Add automated tests or smoke-checks (e.g., a `validateSpreadsheet()` function that checks for required sheet names and column counts).
-2. Add CI (if desired) to run linting or validation on push.
-3. If you want, I can implement `getDashboardData()` and `processPaymentReport()` server functions (if missing) so the HTML files operate end-to-end.
+<!-- Next steps removed by request -->
 
 ## Licensing recommendation (company data)
 
