@@ -30,9 +30,9 @@ function runAutomatedDailySummary() {
     // --- 2. Aggregate ALL validated log entries by Date + MapperUsername ---
     // We no longer de-duplicate by Task_ID. Multi-day tasks may have multiple
     // validated submissions and should all contribute to the same day totals.
-    const dailyAggregates = {};
-+
-    for (const row of logData) {
+  const dailyAggregates = {};
+
+  for (const row of logData) {
       const timestamp = row[0];
       const mapperUsername = row[3];
       const totalBuildings = row[5];
@@ -45,13 +45,13 @@ function runAutomatedDailySummary() {
       for (let i = 6; i <= 15; i++) { totalErrors += row[i] || 0; }
 
       const date = new Date(timestamp).toLocaleDateString("en-CA"); // YYYY-MM-DD format
-      const key = date + '|' + mapperUsername;
-+
-      if (!dailyAggregates[key]) {
-        dailyAggregates[key] = { date, mapperUsername, totalBuildings: 0, totalErrors: 0 };
-      }
-+
-      dailyAggregates[key].totalBuildings += totalBuildings;
+  const key = date + '|' + mapperUsername;
+
+  if (!dailyAggregates[key]) {
+    dailyAggregates[key] = { date, mapperUsername, totalBuildings: 0, totalErrors: 0 };
+  }
+
+  dailyAggregates[key].totalBuildings += totalBuildings;
       dailyAggregates[key].totalErrors += totalErrors;
     }
     
