@@ -27,45 +27,30 @@ function runAutomatedDailySummary() {
     // --- 1. Read all log data into memory ---
     const logData = logSheet.getRange('A2:R' + logSheet.getLastRow()).getValues();
 
-    // --- 2. PERFECTED LOGIC: De-duplicate the logs ---
-    // This ensures only the MOST RECENT entry for each Task_ID is used.
-    const latestLogs = {};
-    for (const row of logData) {
-      const timestamp = new Date(row[0]);
-      const taskId = row[1]; // Column B is Task_ID
-
-      // If we haven't seen this task ID, or if the current entry is newer, we store it.
-      if (!latestLogs[taskId] || timestamp > latestLogs[taskId].timestamp) {
-        latestLogs[taskId] = {
-          timestamp: timestamp,
-          data: row // Store the entire row
-        };
-      }
-    }
-
-    // --- 3. Process and aggregate the DE-DUPLICATED data ---
+    // --- 2. Aggregate ALL validated log entries by Date + MapperUsername ---
+    // We no longer de-duplicate by Task_ID. Multi-day tasks may have multiple
+    // validated submissions and should all contribute to the same day totals.
     const dailyAggregates = {};
-    for (const taskId in latestLogs) {
-      const logEntry = latestLogs[taskId].data;
-      
-      const timestamp = logEntry[0];
-      const mapperUsername = logEntry[3];
-      const totalBuildings = logEntry[5];
-      const validationStatus = logEntry[16];
++
+    for (const row of logData) {
+      const timestamp = row[0];
+      const mapperUsername = row[3];
+      const totalBuildings = row[5];
+      const validationStatus = row[16];
 
-      // Only process entries that are marked as "Validated"
+      // Only process entries that are marked as "Validated" and have a valid timestamp and building count.
       if (validationStatus !== 'Validated' || !totalBuildings || !timestamp) continue;
-      
+
       let totalErrors = 0;
-      for (let i = 6; i <= 15; i++) { totalErrors += logEntry[i] || 0; }
+      for (let i = 6; i <= 15; i++) { totalErrors += row[i] || 0; }
 
       const date = new Date(timestamp).toLocaleDateString("en-CA"); // YYYY-MM-DD format
       const key = date + '|' + mapperUsername;
-
++
       if (!dailyAggregates[key]) {
         dailyAggregates[key] = { date, mapperUsername, totalBuildings: 0, totalErrors: 0 };
       }
-      
++
       dailyAggregates[key].totalBuildings += totalBuildings;
       dailyAggregates[key].totalErrors += totalErrors;
     }
