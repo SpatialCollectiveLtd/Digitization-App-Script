@@ -25,7 +25,7 @@ All code, documentation, and assets in this repository are the property of Spati
 
 ## 6. Security and Vulnerability Reporting
 
-- If you discover a security vulnerability, report it immediately to security@spatialcollective.com and the repository maintainers. Do not disclose publicly until the issue is remediated.
+- If you discover a security vulnerability, report it immediately to connect@spatialcollective.com and the repository maintainers. Do not disclose publicly until the issue is remediated.
 
 ## 7. Liability and Warranty
 
@@ -33,8 +33,8 @@ All code, documentation, and assets in this repository are the property of Spati
 
 ## 8. Contact
 
-- For licensing, publishing, or legal questions: legal@spatialcollective.com
+- For licensing, publishing, or legal questions: connect@spatialcollective.com
 - For repository/technical questions: the repository maintainers (see GitHub repository settings)
 
 ----
-_This file is an internal governance document. If you need an external-facing open-source license (e.g., MIT, Apache-2.0), consult legal before adding it to the repository._
+_This file is an internal governance document.

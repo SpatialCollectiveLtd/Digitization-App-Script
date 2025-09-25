@@ -16,6 +16,6 @@ All contributors, maintainers, and users of this repository are expected to foll
 
 4. Reporting violations
 
-- If you witness or experience a violation of this code of conduct, contact security@spatialcollective.com or the repository maintainers.
+- If you witness or experience a violation of this code of conduct, contact connect@spatialcollective.com or the repository maintainers.
 
-This policy is intentionally brief. For internal enforcement and escalation policies, consult your HR and legal teams.
+This policy is intentionally brief.

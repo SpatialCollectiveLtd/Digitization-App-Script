@@ -39,6 +39,3 @@ function runSummaryWithMockData() {
 - Always run tests on a copy of real spreadsheets or use a dedicated test spreadsheet.
 - The harness intentionally uses synthetic data and illustrative examples — extend it to cover edge cases (timestamps, zero buildings, malformed rows).
 
----
-
-If you'd like, I can create the `TestHarness.gs` file automatically and wire a `runTests` entry in `Menu.gs` for easy execution inside Apps Script.

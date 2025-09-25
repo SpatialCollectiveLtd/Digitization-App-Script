@@ -40,4 +40,3 @@ This repository ("Project") and its contents are the property of Spatial Collect
 - For questions about this license or requests to publish or share code externally, contact: legal@spatialcollective.com or the project maintainers listed in repository metadata.
 
 ----
-This file is a company-internal license template. If you would like a different level of restriction or to add further clauses (e.g., 3rd-party dependency policies, export controls, or CLA requirements), tell me and I will update this file accordingly.

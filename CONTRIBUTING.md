@@ -37,4 +37,3 @@ Thank you for contributing to the DPW automation project. This guide describes t
 
 - Maintainers will create release tags (e.g., `v1.0.0`) on `main` when ready.
 
-If you'd like, I can add GitHub Action templates for CI and PR checks.
