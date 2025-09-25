@@ -18,6 +18,10 @@ This v1 commit captures the original automation logic and UI used in production 
 - `AutomationEngine.gs` — daily automation and payment logic (de-duplication and pay calculations).
 - `ReportExporter.gs` — custom menu & report export helpers.
 - `Dashboard.html` & `DateRangeDialog.html` — HTMLService files used for the dashboard and date-range report dialog.
+ - `Configuration.gs` — centralized configuration constants (sheet names, targets, pay amounts).
+ - `Menu.gs` — single entrypoint for custom spreadsheet menus (adds DPW Tools menu and submenus).
+ - `ManagementTools.gs` — management utilities (e.g., `logTrainingAttendance()` and `processTrainingDate()`), with attendance logging, duplicate checks, and UI dialogs.
+ - `DatepickerDialog.html` — small modal used by the Management tools to select a training date.
 
 ## Quick deploy & verification (Google Apps Script)
 
@@ -41,6 +45,12 @@ This repository contains the v1 release of the DPW automation workflow. The code
 - Confirm the Google Form (if any) maps form answers to the expected columns in `Validation_Log`.
 - The dashboard calls a server function `getDashboardData()`; ensure it exists in `code.gs` (or update the UI to call the correct function name).
 
+### New/updated toolkit notes
+
+- Configuration has been centralized to `Configuration.gs` — change constants there instead of scattering magic values across files. This reduces merge conflicts and makes future updates safer.
+- All UI menu registrations now live in `Menu.gs` (single `onOpen()` hook). Management features (attendance logging) are implemented in `ManagementTools.gs` and use `DatepickerDialog.html` for the modal UI.
+- `ReportExporter.gs` now gracefully handles empty summary sheets and aggregates by the selected timeframe.
+
 ## Verification checklist (minimal)
 
 1. Dashboard loads without JS errors and shows data (if `Daily_Performance_Summary` contains rows).
@@ -52,6 +62,14 @@ This repository contains the v1 release of the DPW automation workflow. The code
 1. Add automated tests or smoke-checks (e.g., a `validateSpreadsheet()` function that checks for required sheet names and column counts).
 2. Add CI (if desired) to run linting or validation on push.
 3. If you want, I can implement `getDashboardData()` and `processPaymentReport()` server functions (if missing) so the HTML files operate end-to-end.
+
+## Licensing recommendation (company data)
+
+Because this repository operates on company data (personally-identifiable information and payroll-related data), treat the code and the data with care:
+
+- Code: It's normal to keep the repository under the company's private organization account (as you have). For the code license, choose a permissive license only if you plan to share the code publicly (e.g., MIT or Apache-2.0). If the code should remain internal or you want to restrict reuse, consider a private license or keep the repo private and omit a public open-source license.
+- Data: Never commit actual company or personal data to the repository. Keep all spreadsheets and exports in Google Drive and out of Git history. If you need test data, add synthetic or anonymized fixtures.
+- Recommended approach for this repo: keep the repository private (do not add a public open-source license). If you must add a license file for internal governance, use a short COMPANY-LICENSE.md explaining permitted use (or Apache-2.0 with an explicit note that data must remain private). I can add a templated COMPANY-LICENSE.md if you want.
 
 ## Contact / Issues
 
